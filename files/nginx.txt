@@ -14,13 +14,10 @@ server {
 
 	server_name i.sandrohc.net;
 
-	root /var/www/static;
+	root /var/www/static/files;
 
 	include snippets/ssl.conf;
 	include snippets/base.conf;
-
-	error_page 404 /var/www/blog/404.html;
-	error_page 403 /var/www/blog/403.html;
 
 	# https://nginx.org/en/docs/http/ngx_http_core_module.html#location
 	location = /upload {
@@ -34,10 +31,11 @@ server {
 		proxy_pass http://mitto;
 	}
 	location = /sharex {
-		try_files files/sharex.sxcu;
+		alias /var/www/static;
+		try_files sharex.sxcu =404;
 	}
 	location / {
-		try_files $uri;
+		try_files $uri =404;
 
 		charset utf-8;
 		default_type text/plain;
@@ -48,5 +46,5 @@ server {
 }
 
 upstream mitto {
-	server localhost:6000;
+	server 127.0.0.1:7000;
 }

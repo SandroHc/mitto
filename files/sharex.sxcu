@@ -5,7 +5,7 @@
   "RequestMethod": "POST",
   "RequestURL": "https://i.sandrohc.net/upload",
   "Headers": {
-    "Authentication": "Basic {base64:YOUR-API-KEY-HERE}"
+    "Authorization": "Basic {base64:USER:PASS}"
   },
   "Body": "MultipartFormData",
   "FileFormName": "file",
