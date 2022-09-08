@@ -1,0 +1,4 @@
+listen_address = '127.0.0.1'
+listen_port = 8080
+public_url = 'https://i.sandrohc.net'
+upload_dir = '/tmp'

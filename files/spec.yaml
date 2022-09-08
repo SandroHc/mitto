@@ -1,0 +1,80 @@
+openapi: 3.0.2
+info:
+    title: Mitto
+    version: 0.1.0
+    description: A file upload server compatible with ShareX.
+    contact:
+        name: SandroHc
+        url: 'https://sandrohc.net'
+servers:
+    -
+        url: '{protocol}://{domain}'
+        description: ''
+        variables:
+            protocol:
+                default: https
+            domain:
+                default: i.sandrohc.net
+paths:
+    /upload:
+        summary: Upload a file.
+        post:
+            requestBody:
+                content:
+                    multipart/form-data: {}
+                required: true
+            responses:
+                '201':
+                    content:
+                        text/xml: {}
+                    description: Contains the filename of the uploaded file.
+                '401':
+                    description: Missing or invalid authentication credentials.
+            security:
+                -
+                    auth: []
+            description: Upload a file.
+    /purge:
+        summary: Purges all uploaded files
+        get:
+            responses:
+                '200':
+                    description: All files were purged.
+                '401':
+                    description: Missing or invalid authentication credentials.
+            security:
+                -
+                    auth: []
+    /sharex:
+        summary: The ShareX custom uploader template.
+        get:
+            responses:
+                '200':
+                    description: ''
+            security:
+                - {}
+    '/delete/{filename}':
+        summary: Delete a file previously uploaded.
+        get:
+            responses:
+                '200':
+                    description: ''
+                '401':
+                    description: Contains the filename of the uploaded file.
+        parameters:
+            -
+                name: filename
+                description: The filename to delete.
+                schema:
+                    type: string
+                in: path
+                required: true
+components:
+    securitySchemes:
+        auth:
+            scheme: basic
+            type: http
+            description: Basic HTTP authentication.
+security:
+    -
+        auth: []

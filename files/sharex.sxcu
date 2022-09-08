@@ -1,0 +1,14 @@
+﻿{
+  "Version": "14.1.0",
+  "Name": "SandroHc.net",
+  "DestinationType": "ImageUploader, TextUploader, FileUploader",
+  "RequestMethod": "POST",
+  "RequestURL": "https://i.sandrohc.net/upload",
+  "Headers": {
+    "Authentication": "Basic {base64:YOUR-API-KEY-HERE}"
+  },
+  "Body": "MultipartFormData",
+  "FileFormName": "file",
+  "URL": "{json:url}",
+  "DeletionURL": "{json:delete_url}"
+}

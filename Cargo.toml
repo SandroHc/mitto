@@ -1,0 +1,40 @@
+[package]
+name = "mitto"
+version = "0.1.0"
+authors = ["SandroHc <sandro123iv@gmail.com>"]
+edition = "2021"
+description = "A file upload server compatible with ShareX."
+readme = "README.md"
+license = "Unlicense"
+repository = "https://github.com/SandroHc/mitto"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# Logging
+tracing = "0.1"
+tracing-subscriber = "0.3"
+# HTTP
+actix-web = { version = "4.1", features = ["rustls"] }
+actix-web-httpauth = "0.8"
+actix-multipart = "0.4"
+# Misc
+thiserror = "1.0"
+futures = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+sanitize-filename = "0.4"
+chrono = "0.4"
+confy = "0.5"
+
+[profile.release]
+lto = true
+strip = true # Automatically strip symbols from the binary.
+#codegen-units = 1
+#opt-level = "z"  # Optimize for size.
+
+[package.metadata.deb]
+depends = "$auto"
+section = "httpd"
+priority = "optional"
+maintainer-scripts = "debian"
+systemd-units = { }
