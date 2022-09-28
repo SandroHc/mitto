@@ -34,6 +34,9 @@ server {
 		alias /var/www/static;
 		try_files sharex.sxcu =404;
 	}
+	location = / {
+		return 301 https://sandrohc.net;
+	}
 	location / {
 		try_files $uri =404;
 
