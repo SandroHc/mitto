@@ -27,9 +27,9 @@ confy = "0.5"
 
 [profile.release]
 lto = true
-strip = true # Automatically strip symbols from the binary.
+strip = "symbols"
 #codegen-units = 1
-#opt-level = "z"  # Optimize for size.
+#opt-level = "z"  # Optimize for size
 
 [package.metadata.deb]
 depends = "$auto"

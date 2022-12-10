@@ -18,3 +18,8 @@ settings... > Import > From URL...". On the URL field, place "https://your-site.
 5. Inspect the package with `dpkg -e target/debian/*.deb` to inspect the systemd scripts
 6. Update the config file "/home/$USER/.config/mitto/mitto.toml" and restart the service via `systemctl restart mitto.service`
 7. And enable the service if not already enabled: `systemctl enable mitto.service`. This will start the service on host startup.
+
+### Useful links
+
+1. https://www.ebbflow.io/blog/vending-linux-1
+2. https://www.ebbflow.io/blog/vending-linux-2
