@@ -27,12 +27,16 @@ mod error;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct AppConfig {
+	/// The address where Mitto will listen on. Usually "127.0.0.1" for listening on the host only
+	/// or "0.0.0.0" to listen on every interface.
 	listen_address: String,
+	/// The port where Mitto will listen on.
 	listen_port: u16,
 	/// The URL where the service will be available.
 	public_url: String,
 	/// The directory to store the uploaded files.
 	upload_dir: PathBuf,
+	/// The authentication token, or password.
 	auth_token: String,
 }
 
@@ -223,14 +227,13 @@ async fn delete(path: web::Path<String>, state: web::Data<AppConfig>) -> impl Re
 }
 
 
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 	tracing_subscriber::fmt::init();
 
 	let cfg: AppConfig = load_config().expect("invalid configuration");
 
-	info!("Listening in http://{}:{}", cfg.listen_address, cfg.listen_port);
+	info!("Listening on http://{}:{}", cfg.listen_address, cfg.listen_port);
 
 	let cfg_copy = cfg.clone();
 	HttpServer::new(move || {
@@ -246,12 +249,15 @@ async fn main() -> std::io::Result<()> {
 		.await
 }
 
+/// Loads the app configurations from a file, or creates one with default values if it doesn't exist.
+///
+/// On Linux systems, the file can be found on "/home/$USER/.config/mitto/mitto.toml".
 fn load_config() -> Result<AppConfig, AppError> {
 	let config_path = confy::get_configuration_file_path("mitto", "mitto")?;
 	info!("Loading config from '{}'", config_path.display());
 
-	let conf: AppConfig = confy::load_path(config_path)?;
-	info!("Application configurations: {:?}", conf);
+	let config = confy::load_path::<AppConfig>(config_path)?;
+	info!("Loaded config: {:?}", config);
 
-	Ok(conf)
+	Ok(config)
 }

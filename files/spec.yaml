@@ -14,7 +14,7 @@ servers:
             protocol:
                 default: https
             domain:
-                default: i.sandrohc.net
+                default: your-site.com
 paths:
     /upload:
         summary: Upload a file.

@@ -1,9 +1,9 @@
 ﻿{
   "Version": "14.1.0",
-  "Name": "SandroHc.net",
+  "Name": "Mitto",
   "DestinationType": "ImageUploader, TextUploader, FileUploader",
   "RequestMethod": "POST",
-  "RequestURL": "https://i.sandrohc.net/upload",
+  "RequestURL": "https://your-site.com/upload",
   "Headers": {
     "Authorization": "Basic {base64:USER:PASS}"
   },

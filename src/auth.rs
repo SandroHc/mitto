@@ -4,6 +4,8 @@ use actix_web_httpauth::extractors::{AuthenticationError, basic};
 use actix_web_httpauth::extractors::basic::{BasicAuth};
 use crate::AppConfig;
 
+/// Middleware that checks that each request has an "Authorization" header and that it matches the
+/// auth token.
 pub async fn validator(
 	req: ServiceRequest,
 	credentials: BasicAuth,

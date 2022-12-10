@@ -1,4 +1,5 @@
 listen_address = '127.0.0.1'
 listen_port = 8080
-public_url = 'https://i.sandrohc.net'
+public_url = 'https://your-site.com'
 upload_dir = '/tmp'
+auth_token = changeme

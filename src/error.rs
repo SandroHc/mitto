@@ -2,14 +2,14 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum AppError {
-	#[error("Configuration error")]
+	#[error("configuration error: {0}")]
 	Config(#[from] confy::ConfyError),
-	#[error("IO error")]
+	#[error("IO error: {0}")]
 	Io(#[from] std::io::Error),
-	#[error("Blocking error")]
+	#[error("blocking error: {0}")]
 	Blocking(#[from] actix_web::error::BlockingError),
-	#[error("Multipart error")]
+	#[error("multipart error: {0}")]
 	Multipart(#[from] actix_multipart::MultipartError),
-	#[error("unknown error")]
-	Unknown,
+	#[error(transparent)]
+	Unknown(#[from] Box<dyn std::error::Error + Send>),
 }
