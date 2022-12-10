@@ -1,5 +1,5 @@
 [Unit]
-Description=A file upload server compatible with ShareX.
+Description=Mitto
 
 [Service]
 ExecStart=/usr/bin/mitto
