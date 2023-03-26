@@ -35,7 +35,8 @@ server {
 		try_files sharex.sxcu =404;
 	}
 	location = / {
-		return 301 https://your-site.com;
+		alias /var/www/static;
+		try_files upload.html =404;
 	}
 	location / {
 		try_files $uri =404;
