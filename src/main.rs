@@ -3,7 +3,8 @@ use std::path::{Path, PathBuf};
 
 use actix_multipart::{Field, Multipart};
 use actix_web::{
-    get, http::header::ContentType, post, web, App, HttpResponse, HttpServer, Responder,
+    get, http::header, http::header::ContentType, post, web, web::Data, App, HttpRequest,
+    HttpResponse, HttpServer, Responder,
 };
 use actix_web_httpauth::middleware::HttpAuthentication;
 use chrono::Utc;
@@ -51,33 +52,52 @@ struct UploadedFile {
 }
 
 #[post("/upload")]
-async fn upload(mut multipart: Multipart, state: web::Data<AppConfig>) -> impl Responder {
+async fn upload(
+    req: HttpRequest,
+    mut multipart: Multipart,
+    state: Data<AppConfig>,
+) -> impl Responder {
     if let Some(Ok(field)) = multipart.next().await {
         let res = save_file(field, &state.upload_dir).await;
         match res {
-            Ok(filename) => {
-                let mut url = state.public_url.clone();
-                url.push('/');
-                url.push_str(filename.as_str());
-
-                let mut delete_url = state.public_url.clone();
-                delete_url.push_str("/delete/");
-                delete_url.push_str(filename.as_str());
-
-                let response = UploadedFile {
-                    name: filename,
-                    url,
-                    delete_url,
-                };
-
-                HttpResponse::Created().json(response)
-            }
+            Ok(filename) => create_response(&req, state, filename),
             Err(error) => HttpResponse::InternalServerError()
                 .content_type(ContentType::plaintext())
                 .body(format!("{error}")),
         }
     } else {
         HttpResponse::BadRequest().finish()
+    }
+}
+
+fn create_response(req: &HttpRequest, state: Data<AppConfig>, filename: String) -> HttpResponse {
+    let mut url = state.public_url.clone();
+    url.push('/');
+    url.push_str(filename.as_str());
+
+    if accepts_json(req) {
+        let mut delete_url = state.public_url.clone();
+        delete_url.push_str("/delete/");
+        delete_url.push_str(filename.as_str());
+
+        let response = UploadedFile {
+            name: filename,
+            url,
+            delete_url,
+        };
+
+        HttpResponse::Created().json(response)
+    } else {
+        HttpResponse::Created()
+            .content_type(ContentType::plaintext())
+            .body(url)
+    }
+}
+
+fn accepts_json(req: &HttpRequest) -> bool {
+    match req.headers().get(header::ACCEPT) {
+        Some(accept) => accept == mime::APPLICATION_JSON.as_ref(),
+        None => false,
     }
 }
 
@@ -154,7 +174,7 @@ async fn create_file(
 }
 
 #[get("/purge")]
-async fn purge(state: web::Data<AppConfig>) -> impl Responder {
+async fn purge(state: Data<AppConfig>) -> impl Responder {
     let upload_dir = state.upload_dir.clone();
     info!(
         "Purging all files from the upload directory: {}",
@@ -197,7 +217,7 @@ async fn purge(state: web::Data<AppConfig>) -> impl Responder {
 }
 
 #[get("/delete/{filename}")]
-async fn delete(path: web::Path<String>, state: web::Data<AppConfig>) -> impl Responder {
+async fn delete(path: web::Path<String>, state: Data<AppConfig>) -> impl Responder {
     let filename = sanitize_filename::sanitize(path.into_inner());
     let file_path = state.upload_dir.join(filename.as_str());
     info!("Deleting file: {}", file_path.display());
@@ -231,7 +251,7 @@ async fn main() -> std::io::Result<()> {
     let cfg_copy = cfg.clone();
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(cfg_copy.clone()))
+            .app_data(Data::new(cfg_copy.clone()))
             .wrap(HttpAuthentication::basic(auth::validator))
             .service(upload)
             .service(purge)
