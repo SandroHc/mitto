@@ -38,8 +38,8 @@ impl Default for AppConfig {
         Self {
             listen_address: "127.0.0.1".to_string(),
             listen_port: 8080,
-            public_url: "http://localhost:8080/".to_string(),
-            upload_dir: PathBuf::from("./"),
+            public_url: "http://localhost:8080".to_string(),
+            upload_dir: PathBuf::from("./media"),
             auth_token: "".to_string(),
         }
     }
@@ -126,9 +126,17 @@ async fn create_file(
     filename: Option<&str>,
 ) -> Result<(String, std::fs::File), AppError> {
     let upload_dir = upload_dir.to_path_buf(); // created owned copy of the path
+    if !upload_dir.exists() {
+        debug!(
+            "Upload directory '{}' does not exist; creating",
+            upload_dir.display()
+        );
+        std::fs::create_dir_all(&upload_dir)?;
+    }
+
     let filename = match filename {
         Some(name) => sanitize_filename::sanitize(name),
-        None => "file.dat".to_owned(),
+        None => "file".to_string(),
     };
 
     // Find available filename
