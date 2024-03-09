@@ -9,6 +9,15 @@ A file upload server compatible with ShareX.
 Start by installing Mitto on your server and configuring the file "/home/$USER/.config/mitto/mitto.toml" to your liking. Then open ShareX and go to "Destinations > Custom uploader
 settings... > Import > From URL...". On the URL field, place "https://your-site.com/sharex" and press OK. On the Headers section, update the "Authorization" header to read "Basic {base64:USER:PASS}" replacing "USER" with any name and "PASS" with the value defined on the `auth_token` key in the `mitto.toml` configuration file.
 
+Once the Mitto instance is running, a file can be uploaded with:
+
+```shell
+curl -X POST \
+    --basic --user username:password \
+    --form "file=@/your/file.txt" \
+    "http://127.0.0.1:8080/upload"
+```
+
 ## Building for Debian
 
 1. `cargo install cargo-deb`
