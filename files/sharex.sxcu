@@ -5,7 +5,8 @@
   "RequestMethod": "POST",
   "RequestURL": "https://your-site.com/upload",
   "Headers": {
-    "Authorization": "Basic {base64:USER:PASS}"
+    "Authorization": "Basic {base64:USER:PASS}",
+    "Accept": "application/json"
   },
   "Body": "MultipartFormData",
   "FileFormName": "file",
