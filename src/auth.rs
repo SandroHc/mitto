@@ -1,6 +1,7 @@
 use actix_web::dev::ServiceRequest;
-use actix_web::web;
+use actix_web::web::Data;
 use actix_web_httpauth::extractors::{basic, AuthenticationError};
+use tracing::trace;
 
 use crate::AppConfig;
 
@@ -9,16 +10,35 @@ pub async fn validator(
     req: ServiceRequest,
     credentials: basic::BasicAuth,
 ) -> Result<ServiceRequest, (actix_web::error::Error, ServiceRequest)> {
-    if let Some(password) = credentials.password() {
-        if let Some(app_config) = req.app_data::<web::Data<AppConfig>>() {
-            if password == app_config.auth_token {
-                return Ok(req);
+    let auth_token = req
+        .app_data::<Data<AppConfig>>()
+        .map(|app_config| app_config.auth_token.as_str())
+        .filter(|auth_token| !auth_token.is_empty());
+
+    match auth_token {
+        None => {
+            trace!("Bypassing auth; no auth token configured");
+            Ok(req)
+        }
+        Some(auth_token) => {
+            if let Some(password) = credentials.password() {
+                if password == auth_token {
+                    trace!("Request passed authentication");
+                    Ok(req)
+                } else {
+                    trace!("Request failed authentication; invalid authorization token");
+                    Err((
+                        AuthenticationError::from(basic::Config::default()).into(),
+                        req,
+                    ))
+                }
+            } else {
+                trace!("Request failed authentication; authorization header not present");
+                Err((
+                    AuthenticationError::from(basic::Config::default()).into(),
+                    req,
+                ))
             }
         }
     }
-
-    Err((
-        AuthenticationError::from(basic::Config::default()).into(),
-        req,
-    ))
 }
