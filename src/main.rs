@@ -10,7 +10,8 @@ use actix_web_httpauth::middleware::HttpAuthentication;
 use chrono::Utc;
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
-use tracing::{debug, info};
+use tracing::{debug, info, level_filters::LevelFilter, trace};
+use tracing_subscriber::EnvFilter;
 
 use crate::error::AppError;
 
@@ -57,6 +58,7 @@ async fn upload(
     mut multipart: Multipart,
     state: Data<AppConfig>,
 ) -> impl Responder {
+    debug!("Processing upload request");
     if let Some(Ok(field)) = multipart.next().await {
         let res = save_file(field, &state.upload_dir).await;
         match res {
@@ -66,6 +68,7 @@ async fn upload(
                 .body(format!("{error}")),
         }
     } else {
+        trace!("Upload request didn't have file");
         HttpResponse::BadRequest().finish()
     }
 }
@@ -105,22 +108,16 @@ pub async fn save_file(mut field: Field, upload_dir: &Path) -> Result<String, Ap
     let content_disposition = field.content_disposition();
     let filename = content_disposition.get_filename();
 
-    info!(
-        "Received file with filename '{}'",
-        filename.unwrap_or("<unk>")
-    );
+    info!("Received file '{}'", filename.unwrap_or("<unk>"));
 
     let (filename, mut file) = create_file(upload_dir, filename).await?;
 
     while let Some(chunk) = field.next().await {
-        if let Err(error) = chunk {
-            return Err(error.into());
-        }
-
-        let bytes = chunk.expect("bytes to be present");
+        let bytes = chunk?;
         file = web::block(move || file.write_all(&bytes).map(|_| file)).await??;
     }
 
+    debug!("Saved file '{filename}' to media directory");
     Ok(filename)
 }
 
@@ -239,8 +236,7 @@ async fn delete(path: web::Path<String>, state: Data<AppConfig>) -> impl Respond
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    tracing_subscriber::fmt::init();
-
+    init_log();
     let cfg: AppConfig = load_config().expect("invalid configuration");
 
     info!(
@@ -260,6 +256,16 @@ async fn main() -> std::io::Result<()> {
     .bind((cfg.listen_address.as_ref(), cfg.listen_port))?
     .run()
     .await
+}
+
+fn init_log() {
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::builder()
+                .with_default_directive(LevelFilter::INFO.into())
+                .from_env_lossy(),
+        )
+        .init();
 }
 
 /// Loads the app configurations from a file, or creates one with default values if it doesn't exist.

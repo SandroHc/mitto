@@ -13,7 +13,7 @@ include = ["/debian", "/src", "LICENSE"]
 [dependencies]
 # Logging
 tracing = "0.1"
-tracing-subscriber = "0.3"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # HTTP
 actix-web = { version = "4.1", features = ["rustls"] }
 actix-web-httpauth = "0.8"
