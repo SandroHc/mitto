@@ -11,21 +11,18 @@ edition = "2021"
 include = ["/debian", "/src", "LICENSE"]
 
 [dependencies]
-# Logging
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-# HTTP
+actix-multipart = "0.6"
 actix-web = { version = "4.1", features = ["rustls"] }
 actix-web-httpauth = "0.8"
-actix-multipart = "0.4"
-# Misc
-thiserror = "1.0"
-futures = "0.3"
-serde = { version = "1.0", features = ["derive"] }
-sanitize-filename = "0.4"
 chrono = "0.4"
-confy = "0.5"
+confy = "0.6"
+futures = "0.3"
 mime = "0.3"
+sanitize-filename = "0.5"
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [profile.release]
 lto = true
